@@ -1,9 +1,3 @@
-# TODO: get the basic pic of GAN as a resource
-# TODO: ask teacher how to write all basic model math structure - like all Relu and this type shit? I can do Latex
-
-
-
-
 pyenv installed in ~/.pyenv
 all python versions installed into ~/.pyenv/versions
 check bash_profile, since all python aliases and paths are there
