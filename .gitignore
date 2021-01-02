@@ -1,2 +1,6 @@
 env/
 training_checkpoints/
+datasets/
+.idea/
+results/
+
