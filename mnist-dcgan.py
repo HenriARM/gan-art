@@ -175,7 +175,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # TODO
     # train(train_dataset, EPOCHS)
     # display_image(EPOCHS)
     main()

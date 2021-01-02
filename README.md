@@ -14,3 +14,6 @@ Useful links
 Used for running multiple Python in MacOS https://github.com/pyenv/pyenv
 How to work with virtual envs in Python https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
+
+# python -m pip install -U scikit-image
+
