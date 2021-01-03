@@ -1,8 +1,7 @@
 import tensorflow as tf
 tf.debugging.set_log_device_placement(True)
 
-from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose, Conv2D, Flatten, \
-    Dropout
+from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose, Conv2D, Flatten, Dropout
 import matplotlib.pyplot as plt
 
 # import glob
