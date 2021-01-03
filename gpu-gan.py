@@ -1,7 +1,8 @@
 import tensorflow as tf
 tf.debugging.set_log_device_placement(True)
 
-from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose, Conv2D, Flatten, Dropout
+from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose, Conv2D, Flatten, \
+Dropout
 import matplotlib.pyplot as plt
 
 # import glob
@@ -10,7 +11,7 @@ import matplotlib.pyplot as plt
 import os
 # import PIL
 import time
-from IPython import display
+# from IPython import display
 
 
 BATCH_SIZE = 32
@@ -166,7 +167,7 @@ def main():
             train_step(images)
 
         # Produce images for the GIF as we go
-        display.clear_output(wait=True)
+        # display.clear_output(wait=True)
         generate_and_save_images(generator, epoch + 1, seed)
 
         # Save the model every epoch
@@ -175,7 +176,7 @@ def main():
         print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
 
         # Generate after the final epoch
-    display.clear_output(wait=True)
+    # display.clear_output(wait=True)
     generate_and_save_images(generator, EPOCHS, seed)
 
 
