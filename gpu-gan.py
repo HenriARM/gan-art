@@ -1,8 +1,11 @@
 import tensorflow as tf
-tf.debugging.set_log_device_placement(True)
 
+# TODO: change
+# tf.debugging.set_log_device_placement(True)
+
+import pathlib
 from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose, Conv2D, Flatten, \
-Dropout
+    Dropout
 import matplotlib.pyplot as plt
 
 # import glob
@@ -11,16 +14,35 @@ import matplotlib.pyplot as plt
 import os
 # import PIL
 import time
+
+
 # from IPython import display
+
+def decode_img(img):
+    # convert the compressed string to a 3D uint8 tensor
+    img = tf.image.decode_png(img, channels=3)
+    return tf.image.resize(img, [28, 28])
+
+
+def process_path(file_path):
+    # load the raw data from the file as a string
+    img = tf.io.read_file(file_path)
+    img = decode_img(img)
+    return img, file_path
 
 
 BATCH_SIZE = 32
 ce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 # train_dataset = tf.data.Dataset.list_files(file_pattern='./dataset/*.jpg').batch(BATCH_SIZE)
 
-train_dataset = tf.keras.preprocessing.image_dataset_from_directory(directory='./datasets/dataset28-transformed',
-                                                                    image_size=(28, 28),
-                                                                    batch_size=BATCH_SIZE)
+# train_dataset = tf.keras.preprocessing.image_dataset_from_directory(directory='./datasets/dataset28-transformed',
+#                                                                     image_size=(28, 28),
+#                                                                     batch_size=BATCH_SIZE)
+
+root = pathlib.Path('./datasets/dataset28-transformed/output')
+train_dataset = tf.data.Dataset.list_files(file_pattern=str(root / '*.png'), shuffle=False)
+train_dataset = train_dataset.map(map_func=process_path)
+train_dataset = train_dataset.batch(batch_size=BATCH_SIZE)
 
 
 def make_generator_model() -> tf.keras.Sequential:
@@ -45,14 +67,6 @@ def make_generator_model() -> tf.keras.Sequential:
         Conv2DTranspose(filters=3, kernel_size=5, strides=2, padding='same', use_bias=False, activation='tanh'),
     ])
 
-    # TODO: new generator with UpSampling
-    # model = Sequential()
-    # model.add(Dense(4 * 4 * 256, activation=”relu”,       input_dim=noise_size))
-    # model.add(Reshape((4, 4, 256)))
-    # model.add(UpSampling2D())
-    # model.add(Conv2D(256, kernel_size=3, padding=”same”))
-    # model.add(BatchNormalization(momentum=0.8))
-    # model.add(Activation(“relu”))
 
 
 
@@ -84,7 +98,8 @@ def discriminator_loss(real_output, fake_output):
 
 
 def generator_loss(fake_output):
-    # TODO: why CE, if on out is picture
+    # The generator loss function measure how well the generator was able to trick the discriminator:
+    # If discriminator will be tricked successfully, it will return 1 (real image)
     return ce(tf.ones_like(fake_output), fake_output)
 
 
@@ -96,7 +111,7 @@ discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
 # This annotation causes the function to be "compiled".
 @tf.function
-def train_step(images):
+def train_step(generator, discriminator, images):
     noise = tf.random.normal([BATCH_SIZE, 100])
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
@@ -140,53 +155,76 @@ def generate_and_save_images(model, epoch, noise):
 # def display_image(epoch_no):
 #   return PIL.Image.open('image_at_epoch_{:04d}.png'.format(epoch_no))
 
+EPOCHS = 10
+
 
 def main():
+    # Manual Chekpoint configuration
+    # iterator = iter(train_dataset)
+
+    # Checkpoints capture the exact value of all parameters (tf.Variable objects) used by a model.
     checkpoint_dir = './training_checkpoints'
-    checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
-    checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
+    checkpoint = tf.train.Checkpoint(epoch=tf.Variable(0),
+                                     # iterator=iterator,
+                                     generator_optimizer=generator_optimizer,
                                      discriminator_optimizer=discriminator_optimizer,
                                      generator=generator,
                                      discriminator=discriminator)
+    manager = tf.train.CheckpointManager(checkpoint, checkpoint_dir, max_to_keep=3)
 
-    EPOCHS = 20
+    # Training
+    checkpoint.restore(manager.latest_checkpoint)
+    if manager.latest_checkpoint:
+        print("Restored from {}".format(manager.latest_checkpoint))
+    else:
+        print("Initializing from scratch.")
+
     noise_dim = 100
 
     # We will reuse this seed overtime (so it's easier) to visualize progress in the animated GIF)
     # its actually used to print each time during training same noise, to see how generator learns
     seed = tf.random.normal([16, noise_dim])
 
-    for epoch in range(EPOCHS):
+    # TODO: recheck that model continues with last weights, not new
+    # used to continue training
+    last_epoch = int(checkpoint.epoch.numpy())
+    # TODO: add check for epoch < EPOCHS
+    for epoch in range(last_epoch, EPOCHS):
         start = time.time()
-        for image_batch in train_dataset:
-            # dataset returns empty y_train as second tuple variable, omit
-            images = image_batch[0]
+        for image_batch, label in train_dataset:
             # normalize the images to [0, 1]
             # image_batch /= 255
-            images = (images - 128) / 128
-            train_step(images)
 
-        # Produce images for the GIF as we go
-        # display.clear_output(wait=True)
-        generate_and_save_images(generator, epoch + 1, seed)
+            # normalize the images to [-1, 1]
+            images = (image_batch - 128) / 128
+            train_step(generator, discriminator, images)
 
-        # Save the model every epoch
-        checkpoint.save(file_prefix=checkpoint_prefix)
+        # increase epoch
+        checkpoint.epoch.assign_add(1)
+        save_path = manager.save()
+        print("Saved checkpoint for epoch {}: {}".format(epoch, save_path))
 
-        print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+        generate_and_save_images(generator, epoch, seed)
+        print('Time for epoch {} is {} sec'.format(epoch, time.time() - start))
 
-        # Generate after the final epoch
-    # display.clear_output(wait=True)
-    generate_and_save_images(generator, EPOCHS, seed)
 
 
 if __name__ == '__main__':
-    try:
-        with tf.device('/device:GPU:0'):
-            main()
-    except RuntimeError as e:
-        print(e)
+    main()
+    # try:
+    #     with tf.device('/device:GPU:0'):
+    #         main()
+    # except RuntimeError as e:
+    #     print(e)
 
 
-
-
+# def main():
+#     gen = Generator()
+#     # tf checkpoint
+#     # gen.save_weights(filepath='./easy_checkpoint.h5', save_format='h5')
+#     # In tf mode creates 3 filels - checkpoint, .index, .data
+#     gen.save_weights(filepath='easy_checkpoint', save_format='tf')
+#
+#
+# if __name__ == '__main__':
+#     main()
