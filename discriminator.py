@@ -1,45 +1,45 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose, UpSampling2D, \
-    Conv2D, Flatten, Dropout, AveragePooling2D
-
+from tensorflow.keras.layers import Dense, LeakyReLU, Conv2D, Flatten, Dropout, AveragePooling2D
 from generator import Generator
 
 
-class Discriminator:
+class Discriminator(tf.keras.Model):
+
     def __init__(self):
-        self.model = tf.keras.Sequential([
-            # When padding='some' and stride=2, calculate padding as if input=output and stride=1.
-            # Then use that padding with stride 2, and you will get exactly output 2x smaller than input
+        super(Discriminator, self).__init__()
+        # When padding='some' and stride=2, calculate padding as if input=output and stride=1.
+        # Then use that padding with stride 2, and you will get exactly output 2x smaller than input
+        # 1x1 convolution (TODO: why?)
+        self.conv1 = Conv2D(filters=64, kernel_size=1, strides=1, padding='same', input_shape=(128, 128, 3))
+        self.conv2 = Conv2D(filters=64, kernel_size=3, strides=1, padding='same')
+        self.conv3 = Conv2D(filters=128, kernel_size=3, strides=1, padding='same')
 
-            # 1x1 convolution (TODO: why?)
-            Conv2D(filters=64, kernel_size=1, strides=1, padding='same', input_shape=[128, 128, 3]),
-            LeakyReLU(),
+    def call(self, x, **kwargs):
+        x = self.conv1(x)
+        x = LeakyReLU()(x)
 
-            Conv2D(filters=64, kernel_size=3, strides=1, padding='same'),
-            LeakyReLU(),
-            Dropout(0.3),
+        x = self.conv2(x)
+        x = LeakyReLU()(x)
+        x = Dropout(0.3)(x)
 
-            AveragePooling2D(pool_size=(2, 2)),
+        x = AveragePooling2D(pool_size=(2, 2))(x)
+        x = Flatten()(x)
+        x = Dense(1)(x)
+        return x
 
-            Conv2D(filters=128, kernel_size=3, strides=1, padding='same'),
-            LeakyReLU(),
-            Dropout(0.3),
 
-            AveragePooling2D(pool_size=(2, 2)),
+def test_discriminator():
+    noise = tf.random.normal([1, 100])
+    generator = Generator()
+    fake_image = generator(noise)
+    discriminator = Discriminator()
 
-            Flatten(),
-            Dense(1)
-        ])
-
-    def get_model(self) -> tf.keras.Sequential:
-        return self.model
+    prediction = discriminator(fake_image)
+    assert prediction.numpy().shape == (1, 1)
 
 
 def main():
-    noise = tf.random.normal([1, 100])
-    image = Generator().get_model().call(inputs=noise, training=False)
-
-    print(Discriminator().get_model().call(inputs=image, training=False))
+    test_discriminator()
 
 
 if __name__ == '__main__':
