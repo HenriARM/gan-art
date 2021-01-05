@@ -43,16 +43,6 @@ def make_generator_model() -> tf.keras.Sequential:
         Conv2DTranspose(filters=3, kernel_size=5, strides=2, padding='same', use_bias=False, activation='tanh'),
     ])
 
-    # TODO: new generator with UpSampling
-    # model = Sequential()
-    # model.add(Dense(4 * 4 * 256, activation=”relu”,       input_dim=noise_size))
-    # model.add(Reshape((4, 4, 256)))
-    # model.add(UpSampling2D())
-    # model.add(Conv2D(256, kernel_size=3, padding=”same”))
-    # model.add(BatchNormalization(momentum=0.8))
-    # model.add(Activation(“relu”))
-
-
 
 def make_discriminator_model() -> tf.keras.Sequential:
     return tf.keras.Sequential([
@@ -82,7 +72,6 @@ def discriminator_loss(real_output, fake_output):
 
 
 def generator_loss(fake_output):
-    # TODO: why CE, if on out is picture
     return ce(tf.ones_like(fake_output), fake_output)
 
 
@@ -105,6 +94,7 @@ def train_step(images):
 
         gen_loss = generator_loss(fake_output)
         disc_loss = discriminator_loss(real_output, fake_output)
+
 
     # https://www.tensorflow.org/api_docs/python/tf/GradientTape
     # GradientTape used to calculate gradient
