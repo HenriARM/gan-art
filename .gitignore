@@ -3,6 +3,7 @@ training_checkpoints/
 datasets/
 .idea/
 results/
+models/
 
 .DS_Store
 
