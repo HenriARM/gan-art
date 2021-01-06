@@ -4,6 +4,7 @@ datasets/
 .idea/
 results/
 models/
+images/
 
 .DS_Store
 
