@@ -9,7 +9,7 @@ class Generator(tf.keras.Model):
 
     def __init__(self, name='generator', **kwargs):
         super(Generator, self).__init__(name=name, **kwargs)
-        self.fc = Dense(32 * 32 * 128, use_bias=False, input_shape=(100,))
+        self.fc = Dense(32 * 32 * 32, use_bias=False, input_shape=(100,))
         self.conv1 = Conv2D(filters=128, kernel_size=3, strides=1, padding='same', use_bias=False)
         self.conv2 = Conv2D(filters=64, kernel_size=3, strides=1, padding='same', use_bias=False)
         self.conv3 = Conv2D(filters=3, kernel_size=3, strides=1, padding='same', use_bias=False)
@@ -18,7 +18,7 @@ class Generator(tf.keras.Model):
         x = self.fc(x)
         x = LeakyReLU()(x)
         x = BatchNormalization(momentum=0.8)(x)
-        x = Reshape((32, 32, 128))(x)
+        x = Reshape((32, 32, 32))(x)
 
         x = UpSampling2D(size=(2, 2))(x)
         x = self.conv1(x)
@@ -38,10 +38,10 @@ class Generator(tf.keras.Model):
 
 def get_generator() -> tf.keras.Sequential:
     return tf.keras.Sequential([
-        Dense(16 * 16 * 128, use_bias=False, input_shape=(100,)),
+        Dense(32 * 32 * 32, use_bias=False, input_shape=(100,)),
         LeakyReLU(),
         BatchNormalization(momentum=0.8),
-        Reshape((16, 16, 128)),
+        Reshape((32, 32, 32)),
 
         UpSampling2D(size=(2, 2)),
         Conv2D(filters=128, kernel_size=3, strides=1, padding='same', use_bias=False),
@@ -60,11 +60,11 @@ def get_generator() -> tf.keras.Sequential:
 
 
 def test_generator():
-    # BATCH = 1
-    # noise = tf.random.normal([BATCH, 100])
-    # model = Generator()
-    # image = model(noise)
-    # assert image.numpy().shape == (BATCH, 128, 128, 3)
+    BATCH = 1
+    noise = tf.random.normal([BATCH, 100])
+    model = Generator()
+    image = model(noise)
+    assert image.numpy().shape == (BATCH, 128, 128, 3)
 
     # TODO: returns error because of BatchNormalization layer
     # model.save('my-model')
@@ -72,10 +72,10 @@ def test_generator():
     # Same Sequential model is working
     # BATCH = 1
     # noise = tf.random.normal([BATCH, 100])
-    model = get_generator()
+    # model = get_generator()
     # image = model(noise)
     # model.save('my-model')
-    model.summary()
+    # model.summary()
 
 
 def main():

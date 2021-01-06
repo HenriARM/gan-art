@@ -1,3 +1,10 @@
+
+
+# TO RUN
+
+1. create folders images and models
+
+
 pyenv installed in ~/.pyenv
 all python versions installed into ~/.pyenv/versions
 check bash_profile, since all python aliases and paths are there
