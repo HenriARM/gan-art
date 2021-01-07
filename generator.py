@@ -1,8 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, BatchNormalization, LeakyReLU, Reshape, UpSampling2D, Conv2D, Activation
-# import requests
-# import json
-# import numpy as np
+import requests
+import json
+import numpy as np
 
 
 class Generator(tf.keras.Model):
@@ -15,6 +15,7 @@ class Generator(tf.keras.Model):
         self.conv3 = Conv2D(filters=3, kernel_size=3, strides=1, padding='same', use_bias=False)
 
     def call(self, x, **kwargs):
+        # TODO: BatchNormalization put in init
         x = self.fc(x)
         x = LeakyReLU()(x)
         x = BatchNormalization(momentum=0.8)(x)
@@ -79,7 +80,7 @@ def test_generator():
 
 
 def main():
-    test_generator()
+    # test_generator()
 
     # # The saved_model.pb file stores the actual TensorFlow program, or model,
     # # and a set of named signatures, each identifying a function that accepts tensor
@@ -90,20 +91,22 @@ def main():
     # tf.saved_model.save(obj=model, export_dir=path)
     # tf.saved_model.load(export_dir=path)
 
-    # # Creating payload for TensorFlow serving request
-    # payload = json.dumps({
-    #     'inputs': [list(noise.numpy().flatten().astype('float64'))]
-    # })
-    #
-    # # Making POST request
-    # headers = {"content-type": "application/json"}
-    # json_response = requests.post('http://localhost:8502/v1/models/generator:predict', data=payload, headers=headers)
-    # image = json.loads(json_response.text)['outputs']
-    # print(np.asarray(image).shape)
-    #
-    # # Decoding results from TensorFlow Serving server
-    # # pred = json.loads(r.content.decode('utf-8'))
-    # # print(pred.shape)
+    noise = tf.random.normal([32, 100])
+
+    # Creating payload for TensorFlow serving request
+    payload = json.dumps({
+        'inputs': [list(noise.numpy().flatten().astype('float64'))]
+    })
+
+    # Making POST request
+    headers = {"content-type": "application/json"}
+    json_response = requests.post('http://localhost:8502/v1/models/generator:predict', data=payload, headers=headers)
+    image = json.loads(json_response.text)['outputs']
+    print(np.asarray(image).shape)
+
+    # Decoding results from TensorFlow Serving server
+    # pred = json.loads(r.content.decode('utf-8'))
+    # print(pred.shape)
 
 
     # gen = Generator()

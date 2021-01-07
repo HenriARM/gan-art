@@ -2,23 +2,28 @@ import tensorflow as tf
 import pathlib
 import matplotlib.pyplot as plt
 
-# import glob
-# import imageio
+import glob
+import imageio
 # import numpy as np
 # import PIL
-# from IPython import display
 import time
 import numpy as np
-from discriminator import Discriminator, get_discriminator
-from generator import Generator, get_generator
+# from discriminator import Discriminator, get_discriminator
+# from generator import Generator, get_generator
+
+from dcgandiscriminator import get_discriminator
+from dcgangenerator import get_generator
+
 
 # =========================  GLOBAL VARIABLES  ================================================
 tf.debugging.set_log_device_placement(False)
 
 EPOCHS = 1
 BATCH_SIZE = 32
-IMAGE_H = 128
-IMAGE_W = 128
+LEARNING_RATE = 1e-4
+
+IMAGE_H = 64
+IMAGE_W = 64
 IMAGE_C = 3
 
 CE = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -40,7 +45,7 @@ def process_path(file_path):
 
 
 def load_dataset():
-    root = pathlib.Path('./datasets/abstract128-transformed')
+    root = pathlib.Path('./datasets/fauvism64-transformed')
     dataset = tf.data.Dataset.list_files(file_pattern=str(root / '*.png'), shuffle=True)
     dataset = dataset.map(map_func=process_path)
     dataset = dataset.batch(batch_size=BATCH_SIZE)
@@ -82,7 +87,7 @@ def generator_loss(fake_output):
 
 
 def train_step(generator, discriminator, generator_optimizer, discriminator_optimizer, images):
-    noise = tf.random.normal([BATCH_SIZE, 100])
+    noise = tf.random.normal([BATCH_SIZE, 1, 1, 100])
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         """
@@ -94,6 +99,8 @@ def train_step(generator, discriminator, generator_optimizer, discriminator_opti
           dy_dx = g.gradient(y, x)
         """
         # TODO: add checks tf.debugging.assert_equal(logits.shape, (32, 10))
+
+        # TODO: training = True
         generated_images = generator(noise)
 
         real_output = discriminator(images)
@@ -128,9 +135,17 @@ def generate_and_save_images(model, epoch, noise):
     plt.show()
 
 
-# # Display a single image using the epoch number
-# def display_image(epoch_no):
-#   return PIL.Image.open('image_at_epoch_{:04d}.png'.format(epoch_no))
+def generate_gif():
+    anim_file = './dcgan.gif'
+    with imageio.get_writer(anim_file, mode='I') as writer:
+        filenames = glob.glob('./images/image*.png')
+        filenames = sorted(filenames)
+        for filename in filenames:
+            image = imageio.imread(filename)
+            writer.append_data(image)
+        image = imageio.imread(filename)
+        writer.append_data(image)
+
 
 # ==================================================================================
 
@@ -141,8 +156,8 @@ def main():
     generator = get_generator()
     discriminator = get_discriminator()
 
-    generator_optimizer = tf.keras.optimizers.Adam(1e-4)
-    discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
+    generator_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+    discriminator_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
 
     # Checkpoints capture the exact value of all parameters (tf.Variable objects) used by a model.
     checkpoint_dir = './training_checkpoints'
@@ -164,7 +179,8 @@ def main():
 
     # We will reuse this seed overtime (so it's easier) to visualize progress in the animated GIF)
     # its actually used to print each time during training same noise, to see how generator learns
-    seed = tf.random.normal([16, noise_dim])
+    seed = tf.random.normal([16, 1, 1, noise_dim])
+    # seed = tf.random.normal([16, noise_dim])
 
     # used to continue training
     last_epoch = int(checkpoint.epoch.numpy())
@@ -194,8 +210,9 @@ def main():
 
 if __name__ == '__main__':
     # main()
-    try:
-        with tf.device('/device:GPU:0'):
-            main()
-    except RuntimeError as e:
-        print(e)
+    generate_gif()
+    # try:
+    #     with tf.device('/device:GPU:0'):
+    #         main()
+    # except RuntimeError as e:
+    #     print(e)
