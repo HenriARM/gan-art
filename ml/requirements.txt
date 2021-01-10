@@ -1,0 +1,12 @@
+tensorflow
+matplotlib
+IPython
+# imgaug
+
+# Specific versions used
+# tensorflow==2.4.0
+
+# Temp
+# bs4
+# lxml
+# scipy
