@@ -1,0 +1,128 @@
+version: '3'
+
+services:
+
+#  mongo:
+#    image: mongo
+#    restart: always
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME: root
+#      MONGO_INITDB_ROOT_PASSWORD: example
+#
+#  mongo-express:
+#    image: mongo-express
+#    restart: always
+#    ports:
+#      - 8081:8081
+#    environment:
+#      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+#      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+
+  minio1:
+
+    image: "minio/minio:RELEASE.2019-10-12T01-39-57Z"
+    hostname: "h_minio1"
+    container_name: "h_minio1"
+    restart: "always"
+    volumes:
+      - "object-storage1-1:/data1"
+      - "object-storage1-2:/data2"
+    ports:
+      - "${MINIO_1_PORT}:9000"
+    environment:
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+    command: "server http://minio{1...4}/data{1...2}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: "30s"
+      timeout: "20s"
+      retries: "3"
+#    networks:
+#      - "my-frontend"
+
+  minio2:
+
+    image: "minio/minio:RELEASE.2019-10-12T01-39-57Z"
+    hostname: "h_minio2"
+    container_name: "h_minio2"
+    restart: "always"
+    volumes:
+      - "object-storage2-1:/data1"
+      - "object-storage2-2:/data2"
+    ports:
+      - "${MINIO_2_PORT}:9000"
+    environment:
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+    command: "server http://minio{1...4}/data{1...2}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: "30s"
+      timeout: "20s"
+      retries: "3"
+#    networks:
+#      - "my-frontend"
+
+  minio3:
+
+    image: "minio/minio:RELEASE.2019-10-12T01-39-57Z"
+    hostname: "h_minio3"
+    container_name: "h_minio3"
+    restart: "always"
+    volumes:
+      - "object-storage3-1:/data1"
+      - "object-storage3-2:/data2"
+    ports:
+      - "${MINIO_3_PORT}:9000"
+    environment:
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+    command: "server http://minio{1...4}/data{1...2}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: "30s"
+      timeout: "20s"
+      retries: "3"
+#    networks:
+#      - "my-frontend"
+
+  minio4:
+
+    image: "minio/minio:RELEASE.2019-10-12T01-39-57Z"
+    hostname: "h_minio4"
+    container_name: "h_minio4"
+    restart: "always"
+    volumes:
+      - "object-storage4-1:/data1"
+      - "object-storage4-2:/data2"
+    ports:
+      - "${MINIO_4_PORT}:9000"
+    environment:
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+    command: "server http://minio{1...4}/data{1...2}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: "30s"
+      timeout: "20s"
+      retries: "3"
+#    networks:
+#      - "my-frontend"
+
+
+volumes:
+  object-storage1-1:
+  object-storage1-2:
+  object-storage2-1:
+  object-storage2-2:
+  object-storage3-1:
+  object-storage3-2:
+  object-storage4-1:
+  object-storage4-2:
+
+#networks:
+#  my-backend:
+#    driver: "bridge"
+#    internal: "true"
+#  my-frontend:
