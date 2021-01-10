@@ -1,0 +1,6 @@
+requests
+Flask
+flask-cors
+python-dotenv
+tensorflow==2.2.0
+# minio
