@@ -1,0 +1,10 @@
+env/
+training_checkpoints/
+datasets/
+.idea/
+results/
+models/
+images/
+
+.DS_Store
+
