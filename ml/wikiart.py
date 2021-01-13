@@ -1,6 +1,8 @@
 # WikiArt API is very poor. Pagination doesn't work and most of links are broken.
 import requests
 
+
+# TODO: download_dataset() <-- page_size and keyword instead of genre, add  count, path injections +  success print on output
 # TODO: code can be rewritten using API 2, but it has same endopoints + Token Auth will be needed
 
 # Get all Artists by specific Genre

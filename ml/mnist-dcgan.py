@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import os
 # import PIL
 import time
-from IPython import display
+# from IPython import display
 
 (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
 train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
@@ -122,57 +122,60 @@ def generate_and_save_images(model, epoch, test_input):
 #   return PIL.Image.open('image_at_epoch_{:04d}.png'.format(epoch_no))
 
 
-def main():
-    # # TODO: add comments on each line
-    # noise = tf.random.normal([1, 100])
-    # generator = make_generator_model()
-    # # generator.summary()
-    # # run call() of Sequential model.
-    # # Don't need to run model on training mode, since not interested in layer training and gradient storing
-    # generated_image = generator.call(inputs=noise, training=False)
-    # # plt.imshow(generated_image[0, :, :, 0], cmap='gray')
-    # # plt.show()
-    #
-    # discriminator = make_discriminator_model()
-    # discriminator.summary()
-    # decision = discriminator.call(generated_image)
-    # print(decision)
-
-
-    checkpoint_dir = './training_checkpoints'
-    checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
-    checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
-                                     discriminator_optimizer=discriminator_optimizer,
-                                     generator=generator,
-                                     discriminator=discriminator)
-
-    EPOCHS = 20
-    noise_dim = 100
-
-    # We will reuse this seed overtime (so it's easier) to visualize progress in the animated GIF)
-    # its actually used to print each time during training same noise, to see how generator learns
-    seed = tf.random.normal([16, noise_dim])
-
-    for epoch in range(EPOCHS):
-        start = time.time()
-        for image_batch in train_dataset:
-            train_step(image_batch)
-
-        # Produce images for the GIF as we go
-        display.clear_output(wait=True)
-        generate_and_save_images(generator, epoch + 1, seed)
-
-        # Save the model every epoch
-        checkpoint.save(file_prefix=checkpoint_prefix)
-
-        print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
-
-        # Generate after the final epoch
-    display.clear_output(wait=True)
-    generate_and_save_images(generator, EPOCHS, seed)
+# def main():
+#     # # TODO: add comments on each line
+#     # noise = tf.random.normal([1, 100])
+#     # generator = make_generator_model()
+#     # # generator.summary()
+#     # # run call() of Sequential model.
+#     # # Don't need to run model on training mode, since not interested in layer training and gradient storing
+#     # generated_image = generator.call(inputs=noise, training=False)
+#     # # plt.imshow(generated_image[0, :, :, 0], cmap='gray')
+#     # # plt.show()
+#     #
+#     # discriminator = make_discriminator_model()
+#     # discriminator.summary()
+#     # decision = discriminator.call(generated_image)
+#     # print(decision)
+#
+#
+#     checkpoint_dir = './training_checkpoints'
+#     checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+#     checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
+#                                      discriminator_optimizer=discriminator_optimizer,
+#                                      generator=generator,
+#                                      discriminator=discriminator)
+#
+#     EPOCHS = 20
+#     noise_dim = 100
+#
+#     # We will reuse this seed overtime (so it's easier) to visualize progress in the animated GIF)
+#     # its actually used to print each time during training same noise, to see how generator learns
+#     seed = tf.random.normal([16, noise_dim])
+#
+#     for epoch in range(EPOCHS):
+#         start = time.time()
+#         for image_batch in train_dataset:
+#             train_step(image_batch)
+#
+#         # Produce images for the GIF as we go
+#         display.clear_output(wait=True)
+#         generate_and_save_images(generator, epoch + 1, seed)
+#
+#         # Save the model every epoch
+#         checkpoint.save(file_prefix=checkpoint_prefix)
+#
+#         print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+#
+#         # Generate after the final epoch
+#     display.clear_output(wait=True)
+#     generate_and_save_images(generator, EPOCHS, seed)
 
 
 if __name__ == '__main__':
     # train(train_dataset, EPOCHS)
     # display_image(EPOCHS)
-    main()
+    # main()
+    # model = make_generator_model()
+    model = make_discriminator_model()
+    model.summary()
