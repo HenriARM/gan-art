@@ -1,22 +1,28 @@
-from flask import Flask, send_file, request, make_response
+from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS, cross_origin
-from config import ProductionConfig, DevelopmentConfig
+import requests
+
+from config import DevelopmentConfig
+
 import tensorflow as tf
 import numpy as np
-
 from PIL import Image
 
-
-# import base64
 import json
 import io
-# from io import BytesIO
-import requests
+import os
+import random
+import string
+
+from minio import Minio
+from minio.error import S3Error
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+
+# ================================ METHODS =====================================
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -25,13 +31,41 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-# def cors(response):
-#     response = make_response(response)
-#     response.headers.add("Access-Control-Allow-Origin", "*")
-#     response.headers.add("Access-Control-Allow-Headers", "*")
-#     response.headers.add("Access-Control-Allow-Methods", "*")
-#     return response
+def get_random_string_8() -> str:
+    length = 8
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
 
+
+def cors(response):
+    response = make_response(response)
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    return response
+
+
+def initialize_minio():
+    # Create a client with the MinIO server playground, its access key and secret key.
+    client = Minio(
+        endpoint="0.0.0.0:9001",
+        access_key="HFKQGYD2P6DJO4U7N33U",
+        secret_key="hO09epo9zT6tslwhh192l0UHbtpCjCYTnE3TYtec",
+        secure=False
+    )
+
+    bucket_name = 'gan'
+    # Make bucket if not exist.
+    found = client.bucket_exists(bucket_name)
+
+    if not found:
+        client.make_bucket(bucket_name)
+    else:
+        print('Bucket ' + bucket_name + ' already exists')
+    return client, bucket_name
+
+
+# ================================ API =====================================
 
 @app.route('/')
 def hello():
@@ -40,44 +74,67 @@ def hello():
 
 @app.route('/images/', methods=['GET'])
 @cross_origin()
-def image_classifier():
+def generate_gallery():
+    # read amount of images wanted to be generated
     batch_size = request.args.get('size')
     try:
         batch_size = int(batch_size)
     except ValueError:
         batch_size = 16
 
+    # Create payload for TensorFlow Serving request
     noise = tf.random.normal([batch_size, 1, 1, 100])
-
-    # Creating payload for TensorFlow serving request
     payload = json.dumps({'inputs': noise.numpy().astype('float64')}, cls=NumpyEncoder)
 
-    # Making POST request
+    # Make POST request
     headers = {"content-type": "application/json"}
     json_response = requests.post('http://localhost:8501/v1/models/generator:predict', data=payload, headers=headers)
+
+    # get on response list of images and convert to np.array
     images = json.loads(json_response.text)['outputs']
     images = np.asarray(images)
     print(images.shape)
 
-    img = images[0] * 127.5 + 127.5
-    img = img.astype(np.uint8)
+    # convert images from normalized to RGB suitable
+    images *= 127.5 + 127.5
+    images = images.astype(np.uint8)
 
-    new_img = Image.fromarray(img)
-    # filename = './img.png'
-    # new_img.save(filename, 'PNG')
+    # initialize Minio
+    client, bucket_name = initialize_minio()
 
-    output = io.BytesIO()
-    new_img.save(output, format='JPEG')
-    hex_data = output.getvalue()
+    # prepare return payload
+    image_names = []
 
-    # return send_file(filename, mimetype='image/png')
-    return send_file(output, mimetype='image/png')
+    # loop images
+    for i in range(images.shape[0]):
+        image = images[i]
 
-    # plt.imshow(img)
-    # plt.axis('off')
-    # plt.show()
+        # convert image from np.array to PIL object
+        # (save on FS required temporarily)
+        image = Image.fromarray(image)
+        file_path = './tmp.png'
+        image.save(file_path, 'PNG')
 
-# TODO: add upload of 2 images
+        with open(file_path, 'rb') as f:
+            # convert image from PIL object to IO stream
+            stream = io.BytesIO(f.read())
+
+            # create random name for each image and save
+            image_name = get_random_string_8() + '.png'
+            image_names.append(image_name)
+
+            # save stream in Minio
+            client.put_object(bucket_name=bucket_name,
+                              object_name=image_name,
+                              data=stream,
+                              content_type='image/png',
+                              length=stream.getbuffer().nbytes)
+
+        # remove temporary file
+        os.remove(file_path)
+
+    return jsonify(image_names)
+
 
 if __name__ == "__main__":
     config = DevelopmentConfig()
