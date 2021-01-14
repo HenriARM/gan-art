@@ -3,45 +3,97 @@
 <head>
     <meta charset="utf-8">
     <title>GAN Art Generation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-<div>
-    <h1>GAN Arts Generation</h1>
-</div>
+<div class="row no-gutters">
 
-<div class="container">
-    <form class="form">
+    <div class="col-md-6 no-gutters">
+        <div class="leftside d-flex justify-content-center align-items-center">
 
-        <div class="input-group">
-            <label for="form-dataset-type" class="label">Dataset type:</label>
-            <select name="cars" id="form-dataset-type" class="input">
-                <option value="fauvism">Fauvism</option>
-                <option value="portraits">Portraits</option>
-                <option value="flowers">Flovers</option>
-            </select>
+            <div>
+                <h1>GAN Art Generation</h1>
+            </div>
+
+            <div class="container">
+                <form class="form">
+
+                    <div class="input-group">
+                        <label for="form-dataset-type" class="label">Dataset type:</label>
+                        <select name="cars" id="form-dataset-type" class="input">
+                            <option value="fauvism">Fauvism</option>
+                            <option value="portraits">Portraits</option>
+                            <option value="flowers">Flovers</option>
+                        </select>
+                    </div>
+
+
+                    <div class="input-group">
+                        <label for="form-gallery-size" class="label">Gallery size:</label>
+                        <input id="form-gallery-size" type="number" class="input" value=1>
+                        <!--TODO: add error messsage everywhere-->
+                        <span class="error-message"></span>
+                    </div>
+
+                    <button type="button" class="button" onclick="generate()">Generate</button>
+
+                </form>
+            </div>
+
         </div>
+    </div>
 
+    <div class="col-md-6 no-gutters">
+        <div class="rightside d-flex justify-content-center align-items-center">
 
-        <div class="input-group">
-            <label for="form-gallery-size" class="label">Gallery size:</label>
-            <input id="form-gallery-size" type="number" class="input" value=1>
-            <!--TODO: add error messsage everywhere-->
-            <span class="error-message"></span>
+            <div class="container">
+                <ul class="thumbnails" id="gallery"></ul>
+                <div class="white-box"></div>
+            </div>
+
         </div>
+    </div>
 
-        <button type="button" class="button" onclick="generate()">Generate</button>
-
-    </form>
 </div>
 
 
-<div class="container">
-    <ul class="thumbnails" id="gallery"></ul>
-    <div class="white-box"></div>
+<!--<div>-->
+<!--<h1>GAN Arts Generation</h1>-->
+<!--</div>-->
+
+<!--<div class="container">-->
+<!--<form class="form">-->
+
+<!--<div class="input-group">-->
+<!--<label for="form-dataset-type" class="label">Dataset type:</label>-->
+<!--<select name="cars" id="form-dataset-type" class="input">-->
+<!--<option value="fauvism">Fauvism</option>-->
+<!--<option value="portraits">Portraits</option>-->
+<!--<option value="flowers">Flovers</option>-->
+<!--</select>-->
+<!--</div>-->
+
+
+<!--<div class="input-group">-->
+<!--<label for="form-gallery-size" class="label">Gallery size:</label>-->
+<!--<input id="form-gallery-size" type="number" class="input" value=1>-->
+<!--&lt;!&ndash;TODO: add error messsage everywhere&ndash;&gt;-->
+<!--<span class="error-message"></span>-->
+<!--</div>-->
+
+<!--<button type="button" class="button" onclick="generate()">Generate</button>-->
+<!--</form>-->
 </div>
+
+
+<!--<div class="container">-->
+<!--<ul class="thumbnails" id="gallery"></ul>-->
+<!--<div class="white-box"></div>-->
+<!--</div>-->
 
 
 <script src="./script.js"></script>
