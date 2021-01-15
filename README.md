@@ -1,3 +1,14 @@
+# TO RUN APPLICATION
+
+Turn up Minio services and Tensorflow Serving
+```
+docker-compose up -d
+```
+
+Run backend server on Flask
+
+Run frontend
+
 
 
 # TO RUN
