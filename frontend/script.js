@@ -61,6 +61,8 @@ function copyImage(imageName, imageLink) {
 }
 
 const lastTwoImages = [];
+let interImages;
+let datasetType;
 
 function saveLastTwoImages(elem, imageName, imageLink) {
 
@@ -83,10 +85,45 @@ function saveLastTwoImages(elem, imageName, imageLink) {
 }
 
 function interpolate() {
-    // TODO: post request images
-    lastTwoImages;
+    console.log(datasetType);
 
-    // TODO: show slider
+    if (lastTwoImages.length !== 2) {
+        console.log('Error, not enough selected images');
+        return 0;
+    }
+
+    // build request
+    // send 2 image names
+    const request = "http://0.0.0.0:4444/interpolate?img1=" + lastTwoImages[0][1]
+        + "&img2=" + lastTwoImages[1][1] + "&dataset=" + datasetType;
+    console.log(request);
+
+    let client = new HttpClient();
+    client.get(request, function (response) {
+        console.log(response);
+        console.log(typeof response);
+
+        let imagePayload = JSON.parse(response);
+        console.log(imagePayload);
+        console.log(typeof imagePayload);
+
+        interImages = imagePayload;
+
+        // for (let i = 0; i < imagePayload.length; i++) {
+        //     let tuple = imagePayload[i];
+        //     let imageName = tuple[0];
+        //     let imageLink = tuple[1];
+        //
+        //     console.log(imageName);
+        //     console.log(imageLink);
+        // }
+
+        // TODO: image source put first
+
+        let interImage = document.getElementById("inter-image");
+        interImage.src = imagePayload[0][1];
+        // TODO: show slider
+    });
 }
 
 function createImageListItem(imageName, imageLink) {
@@ -100,12 +137,6 @@ function createImageListItem(imageName, imageLink) {
         '</div>' +
         '</div>' +
         '</li>');
-    // '<div class="content">' +
-    // '<div class="item-wrapper">' +
-    // '<img src="' + imageLink + '"/>' +
-    // '<div class="title">' + imageName + '</div>' +
-    // '</div>' +
-    // '</div>' +
 
 
     // TODO: All 4 variants didnt worked
@@ -138,9 +169,10 @@ function clearGallery() {
     galleryList.innerHTML = '';
 }
 
-function updateSlider(slideAmount) {
-    let sliderDiv = document.getElementById("sliderAmount");
-    sliderDiv.innerHTML = slideAmount;
+function updateSlider(interStep) {
+    console.log(interStep);
+    let interImage = document.getElementById("inter-image");
+    interImage.src = interImages[interStep][1];
 }
 
 function createLoadingIcon() {
@@ -159,7 +191,7 @@ async function generateGallery() {
     await sleep(2000);
 
     // Get nodes which store form data
-    const datasetType = document.getElementById("form-dataset-type").value;
+    datasetType = document.getElementById("form-dataset-type").value;
     const gallerySize = document.getElementById("form-gallery-size").value;
 
     console.log(datasetType);
@@ -225,9 +257,6 @@ function generate() {
     clearGallery();
     clearWhitebox();
     generateGallery();
-
-    // let iframe = document.getElementById('invisible');
-    // iframe.src = "http://localhost:9001/gan/jwobshlq.png";
 
 }
 

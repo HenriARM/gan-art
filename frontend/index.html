@@ -38,24 +38,17 @@
                     <div class="input-group">
                         <label for="form-gallery-size" class="label">Gallery size:</label>
                         <input id="form-gallery-size" type="number" class="input" value=1>
-                        <!--TODO: add error messsage everywhere-->
                         <span class="error-message"></span>
                     </div>
 
                     <button type="button" class="button" onclick="generate()">Generate</button>
                     <button type="button" class="button" onclick="interpolate()">Interpolate</button>
 
-                    <!-- TODO: click button Interpolate -> check two images selected -> get all 50 images ->  and enable slider
-                     <!-- TODO: -> on start first image src put (preload component)
-
-
-                    <!--<label class="form-label" for="customRange1">Example range</label>-->
                     <div class="range">
-                        <!--TODO: change max-->
-
-                        <input type="range" class="form-range" min="0" max="5" step="1" value="0" id="customRange1"
+                        <input type="range" id="slider" class="slider"
+                               min="0" max="49" step="1" value="0"
                                onchange="updateSlider(this.value)"/>
-                        <img class="thumb-image" src="http://0.0.0.0:9001/gan/mvpwacle.png">
+                        <img id="inter-image" class="thumb-image" width="80%" height="80%" src="">
                     </div>
 
                 </form>
@@ -83,7 +76,6 @@
 
 <script src="./script.js"></script>
 
-<!--<script>-->
 </body>
 </html>
 
