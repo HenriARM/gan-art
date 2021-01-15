@@ -18,6 +18,19 @@ services:
 #      ME_CONFIG_MONGODB_ADMINUSERNAME: root
 #      ME_CONFIG_MONGODB_ADMINPASSWORD: example
 
+  sv:
+    image: tensorflow/serving
+    #      restart: unless-stopped
+    ports:
+      - 8500:8500
+      - 8501:8501
+    volumes:
+      - ./ml/models/fauvism64:/models/fauvism64
+      - ./ml/models/flowers64:/models/flowers64
+      - ./ml/models/celeba128:/models/celeba128
+      - ./models.config:/models/models.config
+    command: --model_config_file=/models/models.config
+
   minio1:
 
     image: "minio/minio:RELEASE.2019-10-12T01-39-57Z"
