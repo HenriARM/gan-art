@@ -35,21 +35,101 @@ let HttpClient = function () {
     }
 };
 
+function copyImage(imageName, imageLink) {
+    console.log('Click');
+    // console.log(this);
+    console.log(imageName);
+    console.log(imageLink);
+
+    let whitebox = document.getElementById("whitebox");
+    whitebox.innerHTML = "";
+
+    let childNodes = htmlToElements(
+        '<div class="content">' +
+        '<div class="item-wrapper d-flex flex-column justify-content-center">' +
+        '<div class="title" style="align-self: center">' + imageName + '</div>' +
+        '<img src="' + imageLink + '" width="80%" height="80%"/>' +
+        '</div>' +
+        '</div>'
+    );
+
+    for (let i = 0; i < childNodes.length; i++) {
+        let child = childNodes[i];
+        whitebox.appendChild(child);
+    }
+
+}
+
+const lastTwoImages = [];
+
+function saveLastTwoImages(elem, imageName, imageLink) {
+
+    console.log('Double click');
+
+    if (lastTwoImages.length < 2) {
+        lastTwoImages.push([elem, imageName, imageLink]);
+        elem.style.background = '#ffbf9b';
+    } else {
+        // get oldest element
+        let oldE = lastTwoImages.shift()[0];
+        oldE.style.background = "none";
+
+
+        lastTwoImages.push([elem, imageName, imageLink]);
+        elem.style.background = '#ffbf9b';
+    }
+
+    console.log(lastTwoImages);
+}
+
+function interpolate() {
+    // TODO: post request images
+    lastTwoImages;
+
+    // TODO: show slider
+}
+
 function createImageListItem(imageName, imageLink) {
-    return htmlToElements('<li>' +
+    return htmlToElements('<li onclick=\"copyImage(\'' + imageName + '\',\'' + encodeURI(imageLink) + '\'' + ')"' +
+        ' ondblclick=\"saveLastTwoImages(this, \'' + imageName + '\',\'' + encodeURI(imageLink) + '\'' + ')"' +
         '<input type="radio" name="select" id="' + imageName + '">' +
         '<div class="item-hugger">' +
         '<div class="title">' + imageName + '</div>' +
         '<img class="thumb-image" src="' + imageLink + '"/>' +
         '<label for="' + imageName + '"></label>' +
         '</div>' +
-        '<div class="content">' +
-        '<div class="item-wrapper">' +
-        '<img src="' + imageLink + '"/>' +
-        '<div class="title">' + imageName + '</div>' +
-        '</div>' +
         '</div>' +
         '</li>');
+    // '<div class="content">' +
+    // '<div class="item-wrapper">' +
+    // '<img src="' + imageLink + '"/>' +
+    // '<div class="title">' + imageName + '</div>' +
+    // '</div>' +
+    // '</div>' +
+
+
+    // TODO: All 4 variants didnt worked
+    // '<iframe id="invisible" style="display:none;"></iframe>\n' +
+
+    // '<form method="get" action="' + imageLink + '">' +
+    // '<button type="submit">Download!</button>' +
+    // '</form>' +
+
+
+    // '<div class="title">' +
+    // '<a href="' + imageLink + '" download="' + imageName + '">' +
+    // imageName +
+    // '</div>' +
+
+
+    // '<a href="' + imageLink + '" download="' + imageName + '">' +
+    // '<button type="submit" onclick="window.open("' + imageLink + '")">Download!</button>' +
+    // '</a>' +
+
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function clearGallery() {
@@ -58,7 +138,25 @@ function clearGallery() {
     galleryList.innerHTML = '';
 }
 
-function generateGallery() {
+function updateSlider(slideAmount) {
+    let sliderDiv = document.getElementById("sliderAmount");
+    sliderDiv.innerHTML = slideAmount;
+}
+
+function createLoadingIcon() {
+    let loadingIcon = htmlToElement('<div id="loading-icon" class="lds-dual-ring"></div>');
+    let whitebox = document.getElementById("whitebox");
+    whitebox.parentNode.insertBefore(loadingIcon, whitebox);
+}
+
+function removeLoadingIcon() {
+    let loadingIcon = document.getElementById("loading-icon");
+    loadingIcon.outerHTML = "";
+}
+
+async function generateGallery() {
+    createLoadingIcon();
+    await sleep(2000);
 
     // Get nodes which store form data
     const datasetType = document.getElementById("form-dataset-type").value;
@@ -92,6 +190,8 @@ function generateGallery() {
         console.log(imagePayload);
         console.log(typeof imagePayload);
 
+        if (imagePayload.length) removeLoadingIcon();
+
         let galleryList = document.getElementById("gallery");
 
         for (let i = 0; i < imagePayload.length; i++) {
@@ -110,16 +210,25 @@ function generateGallery() {
             }
             console.log(imageItem);
             console.log(typeof imageItem);
-
-            // append image item to gallery
-
         }
     });
 
 }
 
+function clearWhitebox() {
+    let whitebox = document.getElementById("whitebox");
+    whitebox.innerHTML = '';
+}
+
 
 function generate() {
     clearGallery();
+    clearWhitebox();
     generateGallery();
+
+    // let iframe = document.getElementById('invisible');
+    // iframe.src = "http://localhost:9001/gan/jwobshlq.png";
+
 }
+
+// TODO: create and remove slider with image tag

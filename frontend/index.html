@@ -3,6 +3,9 @@
 <head>
     <meta charset="utf-8">
     <title>GAN Art Generation</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="./style.css">
@@ -10,10 +13,10 @@
 
 <body>
 
-<div class="row no-gutters">
 
+<div class="row no-gutters">
     <div class="col-md-6 no-gutters">
-        <div class="leftside d-flex justify-content-center align-items-center">
+        <div class="leftside d-flex flex-column justify-content-center align-items-center">
 
             <div>
                 <h1>GAN Art Generation</h1>
@@ -25,9 +28,9 @@
                     <div class="input-group">
                         <label for="form-dataset-type" class="label">Dataset type:</label>
                         <select name="cars" id="form-dataset-type" class="input">
-                            <option value="fauvism">Fauvism</option>
-                            <option value="portraits">Portraits</option>
-                            <option value="flowers">Flovers</option>
+                            <option value="fauvism64">Fauvism</option>
+                            <option value="celeba128">Portraits</option>
+                            <option value="flowers64">Flovers</option>
                         </select>
                     </div>
 
@@ -40,6 +43,20 @@
                     </div>
 
                     <button type="button" class="button" onclick="generate()">Generate</button>
+                    <button type="button" class="button" onclick="interpolate()">Interpolate</button>
+
+                    <!-- TODO: click button Interpolate -> check two images selected -> get all 50 images ->  and enable slider
+                     <!-- TODO: -> on start first image src put (preload component)
+
+
+                    <!--<label class="form-label" for="customRange1">Example range</label>-->
+                    <div class="range">
+                        <!--TODO: change max-->
+
+                        <input type="range" class="form-range" min="0" max="5" step="1" value="0" id="customRange1"
+                               onchange="updateSlider(this.value)"/>
+                        <img class="thumb-image" src="http://0.0.0.0:9001/gan/mvpwacle.png">
+                    </div>
 
                 </form>
             </div>
@@ -48,11 +65,15 @@
     </div>
 
     <div class="col-md-6 no-gutters">
-        <div class="rightside d-flex justify-content-center align-items-center">
+        <div style="overflow: scroll" class="rightside d-flex justify-content-center align-items-center">
 
-            <div class="container">
+
+            <div class="container" style="height: inherit">
                 <ul class="thumbnails" id="gallery"></ul>
-                <div class="white-box"></div>
+
+                <div class="white-box" id="whitebox">
+
+                </div>
             </div>
 
         </div>
@@ -60,43 +81,9 @@
 
 </div>
 
-
-<!--<div>-->
-<!--<h1>GAN Arts Generation</h1>-->
-<!--</div>-->
-
-<!--<div class="container">-->
-<!--<form class="form">-->
-
-<!--<div class="input-group">-->
-<!--<label for="form-dataset-type" class="label">Dataset type:</label>-->
-<!--<select name="cars" id="form-dataset-type" class="input">-->
-<!--<option value="fauvism">Fauvism</option>-->
-<!--<option value="portraits">Portraits</option>-->
-<!--<option value="flowers">Flovers</option>-->
-<!--</select>-->
-<!--</div>-->
-
-
-<!--<div class="input-group">-->
-<!--<label for="form-gallery-size" class="label">Gallery size:</label>-->
-<!--<input id="form-gallery-size" type="number" class="input" value=1>-->
-<!--&lt;!&ndash;TODO: add error messsage everywhere&ndash;&gt;-->
-<!--<span class="error-message"></span>-->
-<!--</div>-->
-
-<!--<button type="button" class="button" onclick="generate()">Generate</button>-->
-<!--</form>-->
-</div>
-
-
-<!--<div class="container">-->
-<!--<ul class="thumbnails" id="gallery"></ul>-->
-<!--<div class="white-box"></div>-->
-<!--</div>-->
-
-
 <script src="./script.js"></script>
+
+<!--<script>-->
 </body>
 </html>
 
